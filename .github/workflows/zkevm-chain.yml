@@ -20,6 +20,9 @@ jobs:
       SECURITY_GROUP_ID: sg-0f9c85f200bb483f6
       REPO: privacy-scaling-explorations/zkevm-chain
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v2
       - run: ./run.sh
