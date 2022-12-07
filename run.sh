@@ -9,7 +9,8 @@ for WORKFLOW_ID in $QUEUED; do
   INSTANCE_TYPE=$(echo "${JOB_LABELS}" | jq -cr '.[1]')
   TAG="${REPO}-${WORKFLOW_ID}"
   INSTANCES_STATUS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=${TAG}" | jq -cr '.Reservations[].Instances[].State.Name')
-  if [ "${INSTANCES_STATUS}" != "" ] && [ "${INSTANCES_STATUS}" != "terminated" ]; then
+  # just in case we somehow ended up with multiple machines with the same id
+  if [ "${INSTANCES_STATUS}" != "" ] && [ $(echo "${INSTANCES_STATUS}" | grep -v terminated) ]; then
     echo 'already deployed'
     continue
   fi
@@ -38,7 +39,7 @@ for VAL in $RES; do
   TAG=$(echo "${VAL}" | jq -cr '.[1]')
   WORKFLOW_ID=$(echo "${VAL}" | awk -F '-' '{ print $NF-1 }')
   JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}" | jq -cr '.status')
-  if [ "${JOB_STATUS}" != "queued" ] || [ "${JOB_STATUS}" != "in_progress" ]; then
+  if [ "${JOB_STATUS}" != "queued" ] && [ "${JOB_STATUS}" != "in_progress" ]; then
     aws ec2 terminate-instances --instance-ids "$ID"
   fi
 done
