@@ -32,16 +32,13 @@ for WORKFLOW_ID in $QUEUED; do
 done
 
 # cleanup if no jobs are in progress nor queued
-RET=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs?status=in_progress" | jq -cr '.workflow_runs[].id')
-if [ "${RET}" != "" ]; then
-  exit
-fi
-RET=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs?status=queued" | jq -cr '.workflow_runs[].id')
-if [ "${RET}" != "" ]; then
-  exit
-fi
-INSTANCES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=${REPO}-*" | jq -cr '.Reservations[].Instances[].InstanceId')
-if [ "${INSTANCES}" == "" ]; then
-  exit
-fi
-aws ec2 terminate-instances --instance-ids $INSTANCES
+RES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=${REPO}-*" "Name=instance-state-name,Values=running" | jq -cr '.Reservations[].Instances[] | [.InstanceId, .Tags[0].Value]')
+for VAL in $RES; do
+  ID=$(echo "${VAL}" | jq -cr '.[0]')
+  TAG=$(echo "${VAL}" | jq -cr '.[1]')
+  WORKFLOW_ID=$(echo "${VAL}" | awk -F '-' '{ print $NF-1 }')
+  JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}" | jq -cr '.status')
+  if [ "${JOB_STATUS}" != "queued" ] || [ "${JOB_STATUS}" != "in_progress" ]; then
+    aws ec2 terminate-instances --instance-ids "$ID"
+  fi
+done
