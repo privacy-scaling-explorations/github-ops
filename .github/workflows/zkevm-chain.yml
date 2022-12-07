@@ -1,0 +1,25 @@
+name: zkevm-chain
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [zkevm-chain]
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  main:
+    timeout-minutes: 5
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GH_PAT: ${{ secrets.GH_PAT }}
+      AWS_DEFAULT_REGION: eu-central-1
+      IMAGE_ID: ami-06148e0e81e5187c8
+      KEY_NAME: pinkie
+      SUBNET_ID: subnet-008f8e9b31063dbcc
+      SECURITY_GROUP_ID: sg-0f9c85f200bb483f6
+      REPO: privacy-scaling-explorations/zkevm-chain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./run.sh
