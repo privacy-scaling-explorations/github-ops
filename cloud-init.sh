@@ -32,7 +32,7 @@ rm -rf github
 mkdir github
 cd github
 RUNNER_TOKEN=$(curl -s -X POST "https://api.github.com/repos/${REPO}/actions/runners/registration-token" -H "accept: application/vnd.github.everest-preview+json" -H "authorization: token ${GITHUB_TOKEN}" | jq -r '.token')
-LATEST_VERSION_LABEL=$(curl -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')
+LATEST_VERSION_LABEL=$(curl -H "authorization: token ${GITHUB_TOKEN}" -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')
 LATEST_VERSION=$(printf -- ${LATEST_VERSION_LABEL} | cut -c 2-)
 RUNNER_FILE="actions-runner-linux-x64-${LATEST_VERSION}.tar.gz"
 RUNNER_URL="https://github.com/actions/runner/releases/download/${LATEST_VERSION_LABEL}/${RUNNER_FILE}"
