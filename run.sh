@@ -21,7 +21,7 @@ for WORKFLOW_ID in $QUEUED; do
   # continue on error
   aws ec2 run-instances \
     --user-data file://.startup.sh \
-    --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": 32, \"DeleteOnTermination\": true } } ]" \
+    --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": 64, \"DeleteOnTermination\": true } } ]" \
     --ebs-optimized \
     --instance-initiated-shutdown-behavior terminate \
     --no-associate-public-ip-address \
