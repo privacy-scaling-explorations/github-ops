@@ -5,7 +5,7 @@ trap 'poweroff' TERM EXIT INT
 
 # github
 REPO='__REPO__'
-RUNNER_LABEL='__RUNNER_LABEL__'
+RUNNER_LABELS='__RUNNER_LABELS__'
 GITHUB_TOKEN='__GITHUB_TOKEN__'
 
 # idle poweroff script
@@ -43,6 +43,6 @@ sudo -u ubuntu tar -xf runner.tar -C runner
 rm runner.tar
 cd ./runner
 RUNNER_URL="https://github.com/${REPO}"
-sudo -u ubuntu ./config.sh --ephemeral --unattended --disableupdate --replace --url "${RUNNER_URL}" --token "${RUNNER_TOKEN}" --labels "${RUNNER_LABEL}"
+sudo -u ubuntu ./config.sh --ephemeral --unattended --disableupdate --replace --url "${RUNNER_URL}" --token "${RUNNER_TOKEN}" --labels "${RUNNER_LABELS}"
 sudo -u ubuntu ./run.sh
 

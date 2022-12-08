@@ -6,7 +6,7 @@ QUEUED=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/
 for WORKFLOW_ID in $QUEUED; do
   JOB_LABELS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}/jobs" | jq -cr '.jobs[].labels')
   echo "${JOB_LABELS}" | grep 'self-hosted' || continue
-  INSTANCE_TYPE=$(echo "${JOB_LABELS}" | jq -cr '.[1]')
+  INSTANCE_TYPE=$(echo "${JOB_LABELS}" | jq -cr '.[2]')
   TAG="${REPO}-${WORKFLOW_ID}"
   INSTANCES_STATUS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=${TAG}" | jq -cr '.Reservations[].Instances[].State.Name')
   # just in case we somehow ended up with multiple machines with the same id
@@ -16,7 +16,8 @@ for WORKFLOW_ID in $QUEUED; do
   fi
 
   echo 'deploying'
-  cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABEL__/${INSTANCE_TYPE}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" > .startup.sh
+  RUNNER_LABELS=$(echo "${JOB_LABELS}" | jq -cr 'join(",")')
+  cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABELS__/${JOB_LABELS}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" > .startup.sh
   # continue on error
   aws ec2 run-instances \
     --user-data file://.startup.sh \
