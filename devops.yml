@@ -1,0 +1,21 @@
+name: devops
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [synchronize, opened, reopened, labeled]
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Ping runner workflow
+        env:
+          # only needs public repo scope (classic token)
+          GH_OPS_PAT: ${{ secrets.GH_OPS_PAT }}
+          # edit the `event_type` if needed. Refers to the `repository_dispatch` event type
+        run: |
+          curl -H "authorization: token $GH_OPS_PAT" 'https://api.github.com/repos/privacy-scaling-explorations/github-ops/dispatches' -d '{"event_type":"zkevm-chain"}'
