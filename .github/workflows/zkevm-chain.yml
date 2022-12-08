@@ -13,11 +13,11 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       GH_PAT: ${{ secrets.GH_PAT }}
-      AWS_DEFAULT_REGION: eu-central-1
-      IMAGE_ID: ami-06148e0e81e5187c8
+      AWS_DEFAULT_REGION: ap-south-1
+      IMAGE_ID: ami-024c319d5d14b463e
       KEY_NAME: pinkie
-      SUBNET_ID: subnet-008f8e9b31063dbcc
-      SECURITY_GROUP_ID: sg-0f9c85f200bb483f6
+      SUBNET_ID: subnet-005b28c6bd85faa5c
+      SECURITY_GROUP_ID: sg-0ec6bb25610783aeb
       REPO: privacy-scaling-explorations/zkevm-chain
     runs-on: ubuntu-latest
     concurrency:
