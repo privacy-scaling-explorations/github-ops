@@ -22,7 +22,6 @@ for WORKFLOW_ID in $QUEUED; do
   INSTANCE_TYPE=$(echo "${JOB_LABELS}" | jq -cr '.[2]')
   TAG="${REPO}-${WORKFLOW_ID}"
   RUNNER_LABELS=$(echo "${JOB_LABELS}" | jq -cr 'join(",")')
-  USER_DATA=$(cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABELS__/${RUNNER_LABELS}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" | base64 -w 0)
 
   IS_SPOT=$(echo "${JOB_LABELS}" | grep -qv "spot"; echo "$?")
   if [ "${IS_SPOT}" = "1" ]; then
@@ -33,6 +32,7 @@ for WORKFLOW_ID in $QUEUED; do
       continue
     fi
 
+    USER_DATA=$(cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABELS__/${RUNNER_LABELS}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" | base64 -w 0)
     JSON=$(
 cat | jq -cr '.' << EOF
 {
@@ -68,8 +68,9 @@ EOF
     fi
 
     # continue on error
+    cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABELS__/${RUNNER_LABELS}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" > .startup.sh
     aws ec2 run-instances \
-      --user-data "${USER_DATA}" \
+      --user-data "file://.startup.sh" \
       --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": 64, \"DeleteOnTermination\": true } } ]" \
       --ebs-optimized \
       --instance-initiated-shutdown-behavior terminate \
