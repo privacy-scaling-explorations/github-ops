@@ -14,7 +14,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       GH_PAT: ${{ secrets.GH_PAT }}
       AWS_DEFAULT_REGION: ap-south-1
-      IMAGE_ID: ami-024c319d5d14b463e
+      IMAGE_ID: ami-0a60600ebca79fab3
       KEY_NAME: pinkie
       SUBNET_ID: subnet-005b28c6bd85faa5c
       SECURITY_GROUP_ID: sg-0ec6bb25610783aeb
