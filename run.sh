@@ -2,12 +2,14 @@
 
 set -eux
 
+EXIT_CODE=0
 QUEUED=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs?status=queued" | jq -cr '.workflow_runs[].id')
 for WORKFLOW_ID in $QUEUED; do
   JOB_DATA=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}/jobs" | jq -cr '.')
 
   if [ "$(echo "${JOB_DATA}" | jq -cr '.jobs | length')" != "1" ]; then
     echo "TODO: more than one job is not supported"
+    EXIT_CODE=1
     continue
   fi
 
@@ -64,7 +66,9 @@ for VAL in $RES; do
   WORKFLOW_ID=$(echo "${TAG}" | awk -F '-' '{ print $NF }')
   JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}" | jq -cr '.status')
   if [ "${JOB_STATUS}" != "queued" ] && [ "${JOB_STATUS}" != "in_progress" ]; then
-    aws ec2 cancel-spot-instance-requests --spot-instance-request-ids "${SPOT_ID}" || true
-    aws ec2 terminate-instances --instance-ids "${INSTANCE_ID}" || true
+    aws ec2 cancel-spot-instance-requests --spot-instance-request-ids "${SPOT_ID}" || EXIT_CODE=1
+    aws ec2 terminate-instances --instance-ids "${INSTANCE_ID}" || EXIT_CODE=1
   fi
 done
+
+exit "${EXIT_CODE}"
