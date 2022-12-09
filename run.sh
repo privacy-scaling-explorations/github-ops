@@ -2,6 +2,7 @@
 
 set -eux
 
+SUBNET_ID=""
 QUEUED=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs?status=queued" | jq -cr '.workflow_runs[].id')
 for WORKFLOW_ID in $QUEUED; do
   JOB_DATA=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}/jobs" | jq -cr '.')
@@ -20,7 +21,7 @@ for WORKFLOW_ID in $QUEUED; do
   TAG="${REPO}-${WORKFLOW_ID}"
   INSTANCES_STATUS=$(aws ec2 describe-spot-instance-requests --filters "Name=tag:Name,Values=${TAG}" | jq -cr '.SpotInstanceRequests[].State')
   # just in case we somehow ended up with multiple machines with the same id
-  if [ "${INSTANCES_STATUS}" != "" ] && [ "$(echo "${INSTANCES_STATUS}" | grep -q -E '(open|active)'; echo "$?")" == "0" ]; then
+  if [ "${INSTANCES_STATUS}" != "" ] && [ "$(echo "${INSTANCES_STATUS}" | grep -q -E '(open|active)'; echo "$?")" = "0" ]; then
     echo 'already deployed'
     continue
   fi
