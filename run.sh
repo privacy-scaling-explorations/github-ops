@@ -7,11 +7,17 @@ QUEUED=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/
 for WORKFLOW_ID in $QUEUED; do
   JOB_DATA=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}/jobs" | jq -cr '.')
 
-  if [ "$(echo "${JOB_DATA}" | jq -cr '.jobs | length')" != "1" ]; then
-    echo "TODO: more than one job is not supported"
-    EXIT_CODE=1
-    continue
-  fi
+  {
+    N_JOBS=$(echo "${JOB_DATA}" | jq -cr '.jobs | length')
+    if [ "${N_JOBS}" = "0" ]; then
+      continue
+    fi
+    if [ "${N_JOBS}" != "1" ]; then
+      echo "TODO: more than one job is not supported"
+      EXIT_CODE=1
+      continue
+    fi
+  }
   echo 'deploying'
 
   JOB_LABELS=$(echo "${JOB_DATA}" | jq -cr '.jobs[].labels')
