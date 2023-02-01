@@ -32,7 +32,7 @@ for WORKFLOW_ID in $QUEUED; do
         continue
       fi
 
-      USER_DATA=$(cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABELS__/${RUNNER_LABELS}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" | base64 -w 0)
+      USER_DATA=$(cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s#__RUNNER_LABELS__#${RUNNER_LABELS}#" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" | base64 -w 0)
       JSON=$(
 cat | jq -cr '.' << EOF
 {
@@ -68,7 +68,7 @@ EOF
       fi
 
       # continue on error
-      cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s/__RUNNER_LABELS__/${RUNNER_LABELS}/" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" > .startup.sh
+      cat cloud-init.sh | sed -e "s#__REPO__#${REPO}#" -e "s#__RUNNER_LABELS__#${RUNNER_LABELS}#" -e "s/__GITHUB_TOKEN__/${GH_PAT}/" > .startup.sh
       aws ec2 run-instances \
         --user-data "file://.startup.sh" \
         --block-device-mapping "[ { \"DeviceName\": \"/dev/sda1\", \"Ebs\": { \"VolumeSize\": 64, \"DeleteOnTermination\": true } } ]" \
