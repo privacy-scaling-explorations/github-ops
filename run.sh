@@ -19,7 +19,8 @@ for WORKFLOW_ID in $QUEUED; do
 
     JOB_ATTEMPTS=$(echo "${JOB_DATA}" | jq -cr '.run_attempt')
     INSTANCE_TYPE=$(echo "${JOB_LABELS}" | jq -cr '.[2]')
-    TAG="${REPO}-${WORKFLOW_ID}"
+    JOB_ID=$(echo "${JOB_DATA}" | jq -cr '.id')
+    TAG="${REPO}-${WORKFLOW_ID}-${JOB_ID}"
     RUNNER_LABELS=$(echo "${JOB_LABELS}" | jq -cr 'join(",")')
 
     IS_SPOT=$(echo "${JOB_LABELS}" | grep -qv "spot"; echo "$?")
@@ -90,8 +91,8 @@ for VAL in $RES; do
   SPOT_ID=$(echo "${VAL}" | jq -cr '.[1]')
   TAG=$(echo "${VAL}" | jq -cr '.[2]')
   STATE=$(echo "${VAL}" | jq -cr '.[3]')
-  WORKFLOW_ID=$(echo "${TAG}" | awk -F '-' '{ print $NF }')
-  JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}" | jq -cr '.status')
+  JOB_ID=$(echo "${TAG}" | awk -F '-' '{ print $NF }')
+  JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/jobs/${JOB_ID}" | jq -cr '.status')
   if [ "${JOB_STATUS}" != "queued" ] && [ "${JOB_STATUS}" != "in_progress" ]; then
     if [ "${STATE}" != "cancelled" ] && [ "${STATE}" != "closed" ]; then
       aws ec2 cancel-spot-instance-requests --spot-instance-request-ids "${SPOT_ID}" || EXIT_CODE=1
@@ -107,8 +108,8 @@ RES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=${REPO}-*" "Nam
 for VAL in $RES; do
   ID=$(echo "${VAL}" | jq -cr '.[0]')
   TAG=$(echo "${VAL}" | jq -cr '.[1]')
-  WORKFLOW_ID=$(echo "${TAG}" | awk -F '-' '{ print $NF }')
-  JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/runs/${WORKFLOW_ID}" | jq -cr '.status')
+  JOB_ID=$(echo "${TAG}" | awk -F '-' '{ print $NF }')
+  JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/jobs/${JOB_ID}" | jq -cr '.status')
   if [ "${JOB_STATUS}" != "queued" ] && [ "${JOB_STATUS}" != "in_progress" ]; then
     aws ec2 terminate-instances --instance-ids "${ID}"
   fi
