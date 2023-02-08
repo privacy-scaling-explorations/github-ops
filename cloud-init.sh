@@ -7,6 +7,7 @@ trap 'poweroff' TERM EXIT INT
 REPO='__REPO__'
 RUNNER_LABELS='__RUNNER_LABELS__'
 GITHUB_TOKEN='__GITHUB_TOKEN__'
+GITHUB_ORG=$(printf -- "${REPO}" | awk -F '/' '{ print $1 }')
 
 # idle poweroff script
 cat >> /etc/crontab << 'EOF'
@@ -22,7 +23,7 @@ cd /
 rm -rf github
 mkdir github
 cd github
-RUNNER_TOKEN=$(curl -s -X POST "https://api.github.com/repos/${REPO}/actions/runners/registration-token" -H "accept: application/vnd.github.everest-preview+json" -H "authorization: token ${GITHUB_TOKEN}" | jq -r '.token')
+RUNNER_TOKEN=$(curl -s -X POST "https://api.github.com/orgs/${GITHUB_ORG}/actions/runners/registration-token" -H "accept: application/vnd.github.everest-preview+json" -H "authorization: token ${GITHUB_TOKEN}" | jq -r '.token')
 LATEST_VERSION_LABEL=$(curl -H "authorization: token ${GITHUB_TOKEN}" -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')
 LATEST_VERSION=$(printf -- ${LATEST_VERSION_LABEL} | cut -c 2-)
 RUNNER_FILE="actions-runner-linux-x64-${LATEST_VERSION}.tar.gz"
@@ -33,7 +34,7 @@ chown -R ubuntu runner
 sudo -u ubuntu tar -xf runner.tar -C runner
 rm runner.tar
 cd ./runner
-RUNNER_URL="https://github.com/${REPO}"
+RUNNER_URL="https://github.com/${GITHUB_ORG}"
 sudo -u ubuntu ./config.sh --ephemeral --unattended --disableupdate --replace --url "${RUNNER_URL}" --token "${RUNNER_TOKEN}" --labels "${RUNNER_LABELS}"
 sudo -u ubuntu ./run.sh
 
