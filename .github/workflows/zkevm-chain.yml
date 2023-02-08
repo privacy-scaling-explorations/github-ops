@@ -10,7 +10,7 @@ jobs:
   main:
     timeout-minutes: 5
     env:
-      GH_PAT: ${{ secrets.GH_PAT }}
+      GH_PAT: ${{ secrets.PAT_OPS_PSE_ORG }}
       IMAGE_ID: ami-0a60600ebca79fab3
       KEY_NAME: pinkie
       SUBNET_ID: subnet-005b28c6bd85faa5c
