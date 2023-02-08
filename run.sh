@@ -23,6 +23,10 @@ for WORKFLOW_ID in $QUEUED; do
     TAG="${REPO}-${WORKFLOW_ID}-${JOB_ID}"
     RUNNER_LABELS=$(echo "${JOB_LABELS}" | jq -cr 'join(",")')
 
+    SUBNETS_NUM=$(echo ${SUBNET_ID} | awk -F\s '{print NF -1}')
+    RAND_SUBNET=$(shuf -i 1-${SUBNETS_NUM} -n 1)
+    RAND_SUBNET_ID=$(echo ${SUBNET_ID} | awk -v rand_num=${RAND_SUBNET} -F' ' '{print $rand_num}')
+
     IS_SPOT=$(echo "${JOB_LABELS}" | grep -qv "spot"; echo "$?")
     if [ "${IS_SPOT}" = "1" ]; then
       INSTANCES_STATUS=$(aws ec2 describe-spot-instance-requests --filters "Name=tag:Name,Values=${TAG}" | jq -cr '.SpotInstanceRequests[].State')
@@ -38,7 +42,7 @@ cat | jq -cr '.' << EOF
 {
   "UserData": "${USER_DATA}",
   "SecurityGroupIds": ["${SECURITY_GROUP_ID}"],
-  "SubnetId": "${SUBNET_ID}",
+  "SubnetId": "${RAND_SUBNET_ID}",
   "ImageId": "${IMAGE_ID}",
   "InstanceType": "${INSTANCE_TYPE}",
   "KeyName": "${KEY_NAME}",
@@ -77,7 +81,7 @@ EOF
         --instance-type "${INSTANCE_TYPE}" \
         --image-id "${IMAGE_ID}" \
         --key-name "${KEY_NAME}" \
-        --subnet-id "${SUBNET_ID}" \
+        --subnet-id "${RAND_SUBNET_ID}" \
         --security-group-id "${SECURITY_GROUP_ID}" \
         --tag-specification "ResourceType=instance,Tags=[{Key=Name,Value=${TAG}}]" || EXIT_CODE=1
     fi
