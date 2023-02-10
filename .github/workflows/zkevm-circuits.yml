@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 5
     env:
       GH_PAT: ${{ secrets.PAT_OPS_PSE_ORG }}
-      IMAGE_ID: ami-07ac3f6ac10eb4c13
+      IMAGE_ID: ami-0f247cb38474e1993
       KEY_NAME: devops
       SUBNET_ID: "subnet-0a992add1642a4aaa subnet-03258a57327ae4d25 subnet-0cd717f7a7760481b"
       SECURITY_GROUP_ID: sg-080ef15f20c28bc59
