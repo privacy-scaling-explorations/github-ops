@@ -13,7 +13,7 @@ jobs:
       GH_PAT: ${{ secrets.PAT_OPS_PSE_ORG }}
       IMAGE_ID: ami-0d801c0521bb88fa8
       KEY_NAME: pinkie
-      SUBNET_ID: "subnet-0b5dc22acead88e96 subnet-0e2c3a3c6d2b5d65b subnet-005b28c6bd85faa5c"
+      SUBNET_ID: ""
       SECURITY_GROUP_ID: sg-0ec6bb25610783aeb
       REPO: privacy-scaling-explorations/zkevm-chain
     runs-on: ubuntu-latest
