@@ -23,9 +23,12 @@ for WORKFLOW_ID in $QUEUED; do
     TAG="${REPO}-${WORKFLOW_ID}-${JOB_ID}"
     RUNNER_LABELS=$(echo "${JOB_LABELS}" | jq -cr 'join(",")')
 
-    SUBNETS_NUM=$(echo ${SUBNET_ID} | awk -F\s '{print NF -1}')
-    RAND_SUBNET=$(shuf -i 1-${SUBNETS_NUM} -n 1)
-    RAND_SUBNET_ID=$(echo ${SUBNET_ID} | awk -v rand_num=${RAND_SUBNET} -F' ' '{print $rand_num}')
+    RAND_SUBNET_ID=''
+    if [ "${SUBNET_ID}" != "" ]; then
+      SUBNETS_NUM=$(echo ${SUBNET_ID} | awk -F\s '{print NF -1}')
+      RAND_SUBNET=$(shuf -i 1-${SUBNETS_NUM} -n 1)
+      RAND_SUBNET_ID=$(echo ${SUBNET_ID} | awk -v rand_num=${RAND_SUBNET} -F' ' '{print $rand_num}')
+    fi
 
     IS_SPOT=$(echo "${JOB_LABELS}" | grep -qv "spot"; echo "$?")
     if [ "${IS_SPOT}" = "1" ]; then
