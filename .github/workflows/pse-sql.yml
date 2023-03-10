@@ -1,0 +1,26 @@
+name: pse-sql
+on:
+  workflow_dispatch:
+    inputs:
+      sql:
+        required: true
+        type: string
+      dbname:
+        required: true
+        type: string
+
+jobs:
+  sql:
+    runs-on: ["self-hosted", "pse-sql"]
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
+    steps:
+      - name: sql
+        env:
+          PSE_SQL_CONNSTRING: ${{ secrets.PSE_SQL_CONNSTRING }}
+          DBNAME: ${{ inputs.dbname }}
+        run: |
+          cat | psql --dbname "${PSE_SQL_CONNSTRING}/${DBNAME}" << 'EOF'
+          ${{ inputs.sql }}
+          EOF
