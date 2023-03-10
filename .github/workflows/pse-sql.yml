@@ -1,0 +1,26 @@
+name: pse-sql
+on:
+  workflow_dispatch:
+    inputs:
+      sql:
+        required: true
+        type: string
+      dbname:
+        required: true
+        type: string
+
+jobs:
+  sql:
+    # TODO: edit
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
+    steps:
+      - name: sql
+        env:
+          DBNAME: ${{ inputs.dbname }}
+        run: |
+          cat | psql --dbname "${DBNAME}" << 'EOF'
+          ${{ inputs.sql }}
+          EOF
