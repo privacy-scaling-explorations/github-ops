@@ -88,7 +88,6 @@ EOF
         --security-group-id "${SECURITY_GROUP_ID}" \
         --tag-specification "ResourceType=instance,Tags=[{Key=Name,Value=${TAG}}]" || EXIT_CODE=1
     fi
-    sleep 40
   done
 done
 
