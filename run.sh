@@ -118,12 +118,17 @@ for VAL in $RES; do
   JOB_ID=$(echo "${TAG}" | awk -F '-' '{ print $NF }')
   JOB_STATUS=$(curl -H "authorization: token ${GH_PAT}" "https://api.github.com/repos/${REPO}/actions/jobs/${JOB_ID}" | jq -cr '.status')
   if [ "${JOB_STATUS}" != "queued" ] && [ "${JOB_STATUS}" != "in_progress" ]; then
-    CURRENT_TIME_EPOCH=$(date +%s)
+    CURRENT_TIME_EPOCH=$(date --utc +%s)
     EC2_LAUNCH_TIME=$(aws ec2 describe-instances --instance-ids "${ID}" --query 'Reservations[*].Instances[*].LaunchTime' --output text)
     LAUNCH_TIME_EPOCH=$(date -d $EC2_LAUNCH_TIME +%s)
     diff=$(expr $CURRENT_TIME_EPOCH - $LAUNCH_TIME_EPOCH)
-    if [ $diff -gt 5400 ]; then
-      aws ec2 terminate-instances --instance-ids "${ID}"
+    #if [ $diff -gt 5400 ]; then
+    if [ $diff -gt 540 ]; then
+      PAST_TIME_EPOCH=$(date --utc +%s -d '-10 minutes')
+      AVG_CPU_UTIL=$(aws cloudwatch get-metric-statistics --namespace AWS/EC2 --metric-name CPUUtilization --period 300 --statistics Average --dimensions Name=InstanceId,Value="${ID}" --start-time "${PAST_TIME_EPOCH}" --end-time "${CURRENT_TIME_EPOCH}" | jq -cr '.Datapoints[-1].Average')
+      if [[ .3 > "${AVG_CPU_UTIL}" ]]; then
+        aws ec2 terminate-instances --instance-ids "${ID}"
+      fi
     fi
   fi
 done
