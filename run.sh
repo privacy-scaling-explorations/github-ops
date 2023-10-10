@@ -126,7 +126,7 @@ for VAL in $RES; do
     if [ $diff -gt 540 ]; then
       PAST_TIME_EPOCH=$(date --utc +%s -d '-10 minutes')
       AVG_CPU_UTIL=$(aws cloudwatch get-metric-statistics --namespace AWS/EC2 --metric-name CPUUtilization --period 300 --statistics Average --dimensions Name=InstanceId,Value="${ID}" --start-time "${PAST_TIME_EPOCH}" --end-time "${CURRENT_TIME_EPOCH}" | jq -cr '.Datapoints[-1].Average')
-      if [[ .3 > "${AVG_CPU_UTIL}" ]]; then
+      if [ .3 \> "${AVG_CPU_UTIL}" ]; then
         aws ec2 terminate-instances --instance-ids "${ID}"
       fi
     fi
