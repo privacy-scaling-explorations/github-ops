@@ -62,7 +62,7 @@ EOF
         --type one-time \
         --instance-interruption-behavior terminate \
         --instance-count 1 \
-        --tag-specification "ResourceType=spot-instances-request,Tags=[{Key=Name,Value=${TAG}}]" \
+        --tag-specification "ResourceType=spot-instances-request,Tags=[{Key=Name,Value=${TAG}},{Key=ProjectName,Value=zkevm}]" \
         --client-token "${TAG}-${JOB_ATTEMPTS}" \
         --launch-specification "${JSON}" || EXIT_CODE=1
 
@@ -86,7 +86,7 @@ EOF
         --key-name "${KEY_NAME}" \
         --subnet-id "${RAND_SUBNET_ID}" \
         --security-group-id "${SECURITY_GROUP_ID}" \
-        --tag-specification "ResourceType=instance,Tags=[{Key=Name,Value=${TAG}}]" || EXIT_CODE=1
+        --tag-specification "ResourceType=instance,Tags=[{Key=Name,Value=${TAG}},{Key=ProjectName,Value=zkevm}]" "ResourceType=volume,Tags=[{Key=ProjectName,Value=zkevm}]" || EXIT_CODE=1
     fi
   done
 done
