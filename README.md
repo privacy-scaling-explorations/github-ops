@@ -1,3 +1,7 @@
+# [Deprecated]
+
+----
+
 This project manages ephemeral GitHub runners for specific repositories.
 If you want to add a new repository, then copy and edit [this file](.github/workflows/zkevm-chain.yml).
 
